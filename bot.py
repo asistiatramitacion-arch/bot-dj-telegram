@@ -4,7 +4,7 @@ import os
 import asyncio
 
 TOKEN = os.getenv("8718621245:AAFXJf1RhZucLVs9yOJIguFwbMEf3C_rkXU")
-ADMIN_ID = 376338797
+ADMIN_ID = 37633897
 
 estado_usuario = {}
 modo_dj = False
