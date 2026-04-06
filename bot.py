@@ -12,7 +12,7 @@ cancion_actual = None
 audio_actual = None
 mensaje_id = None
 dj_user_id = None
-panel_owner_id = None  # 🔥 NUEVO
+panel_owner_id = None
 
 # 🔐 PERMISOS
 def es_dj(user_id):
@@ -55,7 +55,7 @@ async def menu_musica(query):
 # =========================
 async def panel_dj(query):
     global panel_owner_id
-    panel_owner_id = query.from_user.id  # 🔥 quien abre el panel
+    panel_owner_id = query.from_user.id
 
     keyboard = [
         [InlineKeyboardButton("🟢 Activar DJ", callback_data="activar_dj")],
@@ -74,9 +74,16 @@ async def panel(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     keyboard = [[InlineKeyboardButton("🚀 Abrir menú", callback_data="menu")]]
-    msg = await update.message.reply_text("🎛 PANEL PRINCIPAL\n\nPulsa 👇", reply_markup=InlineKeyboardMarkup(keyboard))
+    msg = await update.message.reply_text(
+        "🎛 PANEL PRINCIPAL\n\nPulsa 👇",
+        reply_markup=InlineKeyboardMarkup(keyboard)
+    )
 
-    await context.bot.pin_chat_message(update.effective_chat.id, msg.message_id, disable_notification=True)
+    await context.bot.pin_chat_message(
+        update.effective_chat.id,
+        msg.message_id,
+        disable_notification=True
+    )
 
 # =========================
 # 📌 DJ PLAN
@@ -97,13 +104,22 @@ async def actualizar_directo(context, chat_id):
 
     if mensaje_id:
         try:
-            await context.bot.edit_message_text(chat_id=chat_id, message_id=mensaje_id,
-                text=texto, reply_markup=InlineKeyboardMarkup(keyboard))
+            await context.bot.edit_message_text(
+                chat_id=chat_id,
+                message_id=mensaje_id,
+                text=texto,
+                reply_markup=InlineKeyboardMarkup(keyboard)
+            )
             return
         except:
             mensaje_id = None
 
-    msg = await context.bot.send_message(chat_id, texto, reply_markup=InlineKeyboardMarkup(keyboard))
+    msg = await context.bot.send_message(
+        chat_id,
+        texto,
+        reply_markup=InlineKeyboardMarkup(keyboard)
+    )
+
     mensaje_id = msg.message_id
     await context.bot.pin_chat_message(chat_id, mensaje_id, disable_notification=True)
 
@@ -132,12 +148,14 @@ async def botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await panel_dj(query)
 
     elif data == "activar_dj":
-        if not puede_usar_panel(user_id): return
+        if not puede_usar_panel(user_id):
+            return
         modo_dj = True
         await actualizar_directo(context, chat_id)
 
     elif data == "desactivar_dj":
-        if not puede_usar_panel(user_id): return
+        if not puede_usar_panel(user_id):
+            return
         modo_dj = False
         cola.clear()
         dj_user_id = None
@@ -188,12 +206,18 @@ async def mensajes(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # 🔍 BUSCAR
     elif msg.from_user.id in estado_usuario:
+
+        comando = f"/search@VoiceShazamBot {msg.text}"
+
+        print(f"ENVIANDO: {comando}")  # 🔥 DEBUG
+
         await context.bot.send_message(
             chat_id=chat_id,
-            text=f"/search@VoiceShazamBot {msg.text}"
+            text=comando,
+            disable_notification=True
         )
 
-        # 🔥 BORRAR MENSAJE USUARIO
+        # 🧼 BORRAR MENSAJE USUARIO
         try:
             await msg.delete()
         except:
