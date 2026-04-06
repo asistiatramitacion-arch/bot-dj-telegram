@@ -44,11 +44,11 @@ async def mostrar_menu(query):
     )
 
 # =========================
-# 🎧 BUSCAR
+# 🎧 BUSCAR MÚSICA
 # =========================
 async def menu_musica(query):
-    keyboard = [[InlineKeyboardButton("🔙 Volver", callback_data="menu")]]
-    await query.edit_message_text("🎧 Escribe la canción 👇", reply_markup=InlineKeyboardMarkup(keyboard))
+    estado_usuario[query.from_user.id] = True
+    await query.edit_message_text("🎧 Escribe la canción 👇")
 
 # =========================
 # 🎛 PANEL DJ
@@ -74,6 +74,7 @@ async def panel(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     keyboard = [[InlineKeyboardButton("🚀 Abrir menú", callback_data="menu")]]
+
     msg = await update.message.reply_text(
         "🎛 PANEL PRINCIPAL\n\nPulsa 👇",
         reply_markup=InlineKeyboardMarkup(keyboard)
@@ -98,7 +99,6 @@ async def actualizar_directo(context, chat_id):
 
     keyboard = [
         [InlineKeyboardButton("▶️ Escuchar", callback_data="play_audio")],
-        [InlineKeyboardButton("📀 Ver lista", callback_data="ver_cola")],
         [InlineKeyboardButton("🎧 Buscar música", callback_data="musica")]
     ]
 
@@ -114,12 +114,7 @@ async def actualizar_directo(context, chat_id):
         except:
             mensaje_id = None
 
-    msg = await context.bot.send_message(
-        chat_id,
-        texto,
-        reply_markup=InlineKeyboardMarkup(keyboard)
-    )
-
+    msg = await context.bot.send_message(chat_id, texto, reply_markup=InlineKeyboardMarkup(keyboard))
     mensaje_id = msg.message_id
     await context.bot.pin_chat_message(chat_id, mensaje_id, disable_notification=True)
 
@@ -140,7 +135,6 @@ async def botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await mostrar_menu(query)
 
     elif data == "musica":
-        estado_usuario[user_id] = True
         await menu_musica(query)
 
     elif data == "panel":
@@ -171,7 +165,7 @@ async def botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await context.bot.send_audio(chat_id, audio=audio_actual)
 
 # =========================
-# 👤 DJ
+# 👤 ASIGNAR DJ
 # =========================
 async def dj(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global dj_user_id
@@ -204,20 +198,20 @@ async def mensajes(update: Update, context: ContextTypes.DEFAULT_TYPE):
         cola.append((cancion_actual, audio_actual))
         await actualizar_directo(context, chat_id)
 
-    # 🔍 BUSCAR
+    # 🔍 BUSCAR MÚSICA
     elif msg.from_user.id in estado_usuario:
 
-        comando = f"/search@VoiceShazamBot {msg.text}"
+        texto = msg.text.strip()
 
-        print(f"ENVIANDO: {comando}")  # 🔥 DEBUG
+        if texto.startswith("/"):
+            return
 
-        await context.bot.send_message(
-            chat_id=chat_id,
-            text=comando,
-            disable_notification=True
-        )
+        comando = f"/search@VoiceShazamBot {texto}"
 
-        # 🧼 BORRAR MENSAJE USUARIO
+        print(f"ENVIANDO: {comando}")
+
+        await msg.reply_text(comando)
+
         try:
             await msg.delete()
         except:
@@ -230,6 +224,7 @@ async def mensajes(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # =========================
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [[InlineKeyboardButton("🚀 Abrir menú", callback_data="menu")]]
+
     await update.message.reply_text(
         "⭐ *MENÚ EL PLAN* ⭐",
         parse_mode="Markdown",
