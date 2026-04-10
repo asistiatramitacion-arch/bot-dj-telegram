@@ -111,3 +111,4 @@ La cuenta usada como userbot debe:
 - El bot **no añade botones al mensaje de otro bot**; lo que hace es responder justo debajo con un mensaje de control. Es la forma correcta de hacerlo en Telegram.
 - El panel fijado es **uno solo** y se edita.
 - Los menús temporales se limpian con `Actualizar` y también se autodestruyen con el tiempo.
+
