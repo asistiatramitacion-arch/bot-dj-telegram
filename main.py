@@ -30,11 +30,6 @@ BOT_TOKEN = os.environ["BOT_TOKEN"]
 API_ID = int(os.environ["API_ID"])
 API_HASH = os.environ["API_HASH"]
 USERBOT_SESSION = os.environ["USERBOT_SESSION"]
-ADMIN_IDS = {
-    int(x.strip())
-    for x in os.getenv("ADMIN_IDS", "").split(",")
-    if x.strip()
-}
 VOICE_CHAT_LINK = os.getenv("VOICE_CHAT_LINK", "").strip()
 SEARCH_TRIGGER = os.getenv("SEARCH_TRIGGER", "@sha ").strip()
 STATE_PATH = Path(os.getenv("STATE_PATH", "/data/state.json"))
@@ -49,6 +44,25 @@ logging.basicConfig(
     level=getattr(logging, LOG_LEVEL, logging.INFO),
 )
 logger = logging.getLogger("djplan")
+
+
+def parse_admin_ids(raw: str) -> set[int]:
+    values: set[int] = set()
+    for part in raw.split(","):
+        part = part.strip()
+        if not part:
+            continue
+        part = part.lstrip("=")
+        try:
+            values.add(int(part))
+        except ValueError:
+            logger.warning("ADMIN_IDS inválido ignorado: %r", part)
+    return values
+
+
+ADMIN_IDS = parse_admin_ids(os.getenv("ADMIN_IDS", ""))
+
+LIVE_CAPTION = "🔴 EN DIRECTO - SONANDO AHORA\n▶️ PULSA EL PLAY"
 
 
 @dataclass
@@ -329,6 +343,15 @@ async def forget_temp_message(chat_id: int, message_id: Optional[int]) -> None:
     save_all_states()
 
 
+def forget_track_control_message(chat_id: int, message_id: Optional[int]) -> None:
+    if not message_id:
+        return
+    registry = TRACK_CONTROL_REGISTRY.get(chat_id, {})
+    for source_message_id, control_message_id in list(registry.items()):
+        if control_message_id == message_id:
+            registry.pop(source_message_id, None)
+
+
 async def safe_delete(bot, chat_id: int, message_id: Optional[int]) -> None:
     if not message_id:
         return
@@ -336,7 +359,9 @@ async def safe_delete(bot, chat_id: int, message_id: Optional[int]) -> None:
         await bot.delete_message(chat_id=chat_id, message_id=message_id)
     except Exception:
         pass
-    await forget_temp_message(chat_id, message_id)
+    finally:
+        forget_track_control_message(chat_id, message_id)
+        await forget_temp_message(chat_id, message_id)
 
 
 async def delete_later(bot, chat_id: int, message_id: int, ttl: int) -> None:
@@ -569,11 +594,29 @@ class VoiceEngine:
         await self.client.start()
         self.calls = PyTgCalls(self.client)
 
-        @self.calls.on_stream_end()  # type: ignore[attr-defined]
-        async def _on_stream_end(_, update):
-            chat_id = int(update.chat_id)
-            logger.info("Stream terminado en %s", chat_id)
-            await self.play_next_from_queue(chat_id)
+        stream_end_registered = False
+        stream_end_hook = getattr(self.calls, "on_stream_end", None)
+        if callable(stream_end_hook):
+            try:
+                @stream_end_hook()  # type: ignore[misc]
+                async def _on_stream_end(_, update):
+                    try:
+                        chat_id = int(getattr(update, "chat_id"))
+                    except Exception:
+                        logger.exception("No se pudo leer chat_id del fin de stream")
+                        return
+                    logger.info("Stream terminado en %s", chat_id)
+                    await self.play_next_from_queue(chat_id)
+
+                stream_end_registered = True
+            except Exception:
+                logger.exception("No se pudo registrar on_stream_end() en PyTgCalls")
+
+        if not stream_end_registered:
+            logger.warning(
+                "PyTgCalls instalado sin on_stream_end; el bot arrancará, "
+                "pero el autoplay al terminar la pista queda desactivado."
+            )
 
         await self.calls.start()
         logger.info("Userbot + voice engine iniciados")
@@ -786,6 +829,11 @@ async def close_dj_session(bot, chat_id: int) -> None:
         except Exception:
             pass
         await safe_delete(bot, chat_id, state.panel_message_id)
+    TRACK_REGISTRY.pop(chat_id, None)
+    TRACK_CONTROL_REGISTRY.pop(chat_id, None)
+    for key in list(PENDING_ACTIONS.keys()):
+        if key.startswith(f"{chat_id}:"):
+            PENDING_ACTIONS.pop(key, None)
     STATE_CACHE[chat_id] = ChatState()
     save_all_states()
     await cleanup_old_files(chat_id)
