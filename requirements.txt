@@ -1,1 +1,4 @@
-python-telegram-bot==20.3
+python-telegram-bot==21.7
+telethon==1.38.1
+py-tgcalls==2.2.11
+ntgcalls==2.1.0
