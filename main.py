@@ -230,12 +230,6 @@ def panel_text(state: ChatState) -> str:
         f"📀🎶 <b>{current}</b> 🎶"
     )
 
-
-def panel_markup() -> InlineKeyboardMarkup:
-    if VOICE_CHAT_LINK:
-        return InlineKeyboardMarkup(
-            [[InlineKeyboardButton("🎧 Unirse al directo", url=VOICE_CHAT_LINK)]]
-        )
     
 def control_header(state: ChatState) -> str:
     current_title = "Nada sonando"
@@ -267,11 +261,6 @@ def control_panel_text(state: ChatState) -> str:
 
 
 def control_panel_markup(state: ChatState) -> InlineKeyboardMarkup:
-    voice_button = (
-        InlineKeyboardButton("🎧 Unirse al directo", url=VOICE_CHAT_LINK)
-        if VOICE_CHAT_LINK
-        else InlineKeyboardButton("🎧 Unirse al directo", callback_data="panel_voice_info")
-    )
     auto_label = f"🔁 Auto {state.autoplay_offset}"
     return InlineKeyboardMarkup(
         [
