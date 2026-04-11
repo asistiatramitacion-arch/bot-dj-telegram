@@ -236,11 +236,7 @@ def panel_markup() -> InlineKeyboardMarkup:
         return InlineKeyboardMarkup(
             [[InlineKeyboardButton("🎧 Unirse al directo", url=VOICE_CHAT_LINK)]]
         )
-    return InlineKeyboardMarkup(
-        [[InlineKeyboardButton("🎧 Unirse al directo", callback_data="panel_voice_info")]]
-    )
-
-
+    
 def control_header(state: ChatState) -> str:
     current_title = "Nada sonando"
     next_title = "Nada en cola"
