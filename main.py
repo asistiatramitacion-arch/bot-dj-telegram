@@ -240,7 +240,8 @@ def control_header(state: ChatState) -> str:
     if state.queue:
         nxt = Track(**state.queue[0])
         next_title = shorten_title(nxt.title, 38)
-
+def panel_markup() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup([])
     auto_label = f"{state.autoplay_offset}s" if state.autoplay_offset >= 0 else str(state.autoplay_offset)
     paused_label = "⏸️ PAUSADO" if state.paused else "▶️ ACTIVO"
     return (
