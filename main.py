@@ -444,22 +444,22 @@ def panel_text(state: ChatState) -> str:
     if state.panel_override_text:
         return f"✨ <b>DJ-PLAN✨ {state.panel_override_text}</b>"
 
-    status = "🟢🔊" if state.live_enabled else "🔴🔇"
+    status = "🛜🔊" if state.live_enabled else "🔴🔇"
     dj = state.assigned_dj_name or "Sin asignar"
 
     if state.now_playing:
         track = Track(**state.now_playing)
-        song_label = "AHORA"
+        song_label = "▶️"
         song_value = shorten_title(track.title, 28)
     elif state.queue:
         track = Track(**state.queue[0])
-        song_label = "SIG"
+        song_label = "⏭️"
         song_value = shorten_title(track.title, 28)
     else:
-        song_label = "SIG"
+        song_label = "⏹️"
         song_value = "Nada sonando"
 
-    return f"{status} <b>DJ-PLAN:</b> <b>{dj}</b> ✨ | 🎶<b>{song_label}:</b> <i>{song_value}</i>🎶"
+    return f"🎧<b>MÚSICA DIRECTO</b>{status}<b>{song_label}:</b> <i>{song_value}</i>"
 
 
 def panel_markup() -> Optional[InlineKeyboardMarkup]:
@@ -482,17 +482,17 @@ def control_header(state: ChatState) -> str:
     auto_track_label = "ON" if state.auto_track_enabled else "OFF"
     auto_sig_label = format_auto_sig_label(state.auto_sig_seconds)
     return (
-        "<b>🎛️ CUADRO DE MANDOS DJ</b>\n\n"
-        f"🎵 Actual: <b>{current_title}</b>\n"
+        "<b>🎛️ CUADRO DE MANDOS DJ 🎛️</b>\n\n"
+        f"▶️ Actual: <b>{current_title}</b>\n"
         f"⏭️ Primera en cola: <b>{next_title}</b>\n"
         f"⏳ Queda: <b>{remaining_label}</b>\n\n"
         f"📋 En cola: <b>{len(state.queue)}</b>\n"
         f"📚 Biblioteca: <b>{len(state.library)}</b>\n"
         f"🎧 DJ actual: <b>{state.assigned_dj_name or 'Sin asignar'}</b>\n"
-        f"🔴 LIVE: <b>{live_label}</b>\n"
+        f"🛜 LIVE: <b>{live_label}</b>\n"
         f"🔁 AUTO-TRACK: <b>{auto_track_label}</b>\n"
         f"⏭️ AUTO-SIG: <b>{auto_sig_label}</b>\n"
-        f"🔊 Volumen: <b>{state.volume}</b>\n\n"
+        f"🔊 VOL: <b>{state.volume}</b>\n\n"
     )
 
 
@@ -501,39 +501,39 @@ def control_panel_text(state: ChatState) -> str:
 
 
 def control_panel_markup(state: ChatState) -> InlineKeyboardMarkup:
-    voice_button = InlineKeyboardButton("🎧 Unirse al directo", callback_data="panel_join_live")
-    live_label = "🔴 LIVE OFF" if state.live_enabled else "🟢 LIVE ON"
-    auto_track_label = f"🔁 AUTO-TRACK {'ON' if state.auto_track_enabled else 'OFF'}"
-    auto_sig_label = f"⏭️ AUTO-SIG {format_auto_sig_label(state.auto_sig_seconds)}"
+    voice_button = InlineKeyboardButton("🎧 IR DIRECTO", callback_data="panel_join_live")
+    live_label = "🔴 LIVE OFF" if state.live_enabled else "🛜 LIVE ON"
+    auto_track_label = f"🏧 AUTO {'ON' if state.auto_track_enabled else 'OFF'}"
+    auto_sig_label = f"🕐 AUTO-TEMP {format_auto_sig_label(state.auto_sig_seconds)}"
     return InlineKeyboardMarkup(
         [
             [
                 InlineKeyboardButton(live_label, callback_data="panel_live_toggle"),
-                InlineKeyboardButton("⏭️ Siguiente", callback_data="panel_next"),
+                InlineKeyboardButton("⏭️ SIG.", callback_data="panel_next"),
                 InlineKeyboardButton(auto_track_label, callback_data="panel_auto_track"),
             ],
             [
                 InlineKeyboardButton(auto_sig_label, callback_data="panel_auto_sig"),
-                InlineKeyboardButton("📋 Ver lista", callback_data="panel_queue"),
-                InlineKeyboardButton("📚 Biblioteca", callback_data="panel_library"),
+                InlineKeyboardButton("📋 LISTA", callback_data="panel_queue"),
+                InlineKeyboardButton("📚 BIBLIOTECA", callback_data="panel_library"),
             ],
             [
-                InlineKeyboardButton("💾 Guardar lista", callback_data="panel_save_list"),
-                InlineKeyboardButton("📂 Cargar lista", callback_data="panel_load_lists"),
+                InlineKeyboardButton("💾 GUARDAR LISTA", callback_data="panel_save_list"),
+                InlineKeyboardButton("📂 CARGAR LISTA", callback_data="panel_load_lists"),
             ],
             [
-                InlineKeyboardButton("🔎 Buscar", callback_data="panel_search_help"),
-                InlineKeyboardButton("🧭 Rastrear", callback_data="panel_scan"),
+                InlineKeyboardButton("🔎 BUSCAR", callback_data="panel_search_help"),
+                InlineKeyboardButton("🧭 RASTREAR", callback_data="panel_scan"),
             ],
             [
-                InlineKeyboardButton("📌 Fijar temporal", callback_data="panel_pin_edit"),
-                InlineKeyboardButton("👥 Permisos", callback_data="panel_users"),
+                InlineKeyboardButton("📌 FIJAR TEMPORAL", callback_data="panel_pin_edit"),
+                InlineKeyboardButton("👥 PERMISOS", callback_data="panel_users"),
                 InlineKeyboardButton("🧹 LIMPIAR", callback_data="panel_clean"),
             ],
             [
-                InlineKeyboardButton("🔉 Vol -", callback_data="panel_vol_down"),
-                InlineKeyboardButton("🔊 Vol +", callback_data="panel_vol_up"),
-                InlineKeyboardButton("🔄 Actualizar", callback_data="panel_refresh"),
+                InlineKeyboardButton("🔉 VOL -", callback_data="panel_vol_down"),
+                InlineKeyboardButton("🔊 VOL +", callback_data="panel_vol_up"),
+                InlineKeyboardButton("🔄 ACTUALIZAR", callback_data="panel_refresh"),
             ],
             [
                 voice_button,
@@ -552,7 +552,6 @@ def control_back_markup(extra_rows: Optional[List[List[InlineKeyboardButton]]] =
 def main_menu_markup() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         [
-            [InlineKeyboardButton("🔎 BUSCAR MÚSICA", callback_data="menu_search_help")],
             [InlineKeyboardButton("🎛️ ACTIVAR MODO DJ", callback_data="menu_panel")],
         ]
     )
