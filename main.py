@@ -444,7 +444,7 @@ def panel_text(state: ChatState) -> str:
     if state.panel_override_text:
         return f"✨ <b>DJ-PLAN✨ {state.panel_override_text}</b>"
 
-    status = "🛜ON🛜" if state.live_enabled else "🛑OFF🛑"
+    status = "🛜ON" if state.live_enabled else "OFF🛑"
     dj = state.assigned_dj_name or "Sin asignar"
 
     if state.now_playing:
@@ -459,7 +459,7 @@ def panel_text(state: ChatState) -> str:
         song_label = "❌"
         song_value = "Nada sonando"
 
-    return f"🎧 <b>DIRECTO</b> {status} | <b>{song_label}</b> <i>{song_value}</i> | 🎧 DJ: <b>{dj}</b>"
+    return f"📡<b>LIVE</b>{status} <b>{song_label}</b> <i>{song_value}</i> | 🎧 DJ: <b>{dj}</b>"
 
 
 def panel_markup() -> Optional[InlineKeyboardMarkup]:
@@ -482,34 +482,29 @@ def control_header(state: ChatState) -> str:
     auto_track_label = "ON" if state.auto_track_enabled else "OFF"
     auto_sig_label = format_auto_sig_label(state.auto_sig_seconds)
     return (
-        "<b>🎛️ CUADRO DE MANDOS DJ</b>\n\n"
-        f"🎵 Actual: <b>{current_title}</b>\n"
-        f"⏭️ Primera en cola: <b>{next_title}</b>\n"
-        f"⏳ Queda: <b>{remaining_label}</b>\n\n"
+        "<b>🎛️ CUADRO DE MANDOS DJ 🎛️</b>\n\n"
+        f"▶️ Actual: <b>{current_title}</b>\n"
+        f"⏭️ Próxima: <b>{next_title}</b>\n"
+        f"🕐 Queda: <b>{remaining_label}</b>\n\n"
         f"📋 En cola: <b>{len(state.queue)}</b>\n"
         f"📚 Biblioteca: <b>{len(state.library)}</b>\n"
         f"🎧 DJ actual: <b>{state.assigned_dj_name or 'Sin asignar'}</b>\n"
-        f"🔴 LIVE: <b>{live_label}</b>\n"
-        f"🔁 AUTO: <b>{auto_track_label}</b>\n"
-        f"⏭️ tEMP: <b>{auto_sig_label}</b>\n"
-        f"🔊 Volumen: <b>{state.volume}</b>\n\n"
+        f"🔴 Live: <b>{live_label}</b>\n"
+        f"🏧 Auto: <b>{auto_track_label}</b>\n"
+        f"⏭️ Temp: <b>{auto_sig_label}</b>\n"
+        f"🔊 Vol: <b>{state.volume}</b>\n\n"
     )
 
-
-def control_panel_text(state: ChatState) -> str:
-    return control_header(state) + "Selecciona una acción del panel."
-
-
 def control_panel_markup(state: ChatState) -> InlineKeyboardMarkup:
-    voice_button = InlineKeyboardButton("🎧 Unirse al directo", callback_data="panel_join_live")
-    live_label = "🔴 LIVE OFF" if state.live_enabled else "🟢 LIVE ON"
-    auto_track_label = f"🔁 AUTO-TRACK {'ON' if state.auto_track_enabled else 'OFF'}"
-    auto_sig_label = f"⏭️ AUTO-SIG {format_auto_sig_label(state.auto_sig_seconds)}"
+    voice_button = InlineKeyboardButton("🎧 Ir directo", callback_data="panel_join_live")
+    live_label = "🔴LIVE OFF" if state.live_enabled else " LIVE ON"
+    auto_track_label = f"🏧 AUTO {'ON' if state.auto_track_enabled else 'OFF'}"
+    auto_sig_label = f"⏭️ Temp. {format_auto_sig_label(state.auto_sig_seconds)}"
     return InlineKeyboardMarkup(
         [
             [
                 InlineKeyboardButton(live_label, callback_data="panel_live_toggle"),
-                InlineKeyboardButton("⏭️ Siguiente", callback_data="panel_next"),
+                InlineKeyboardButton("⏭️ PROX.", callback_data="panel_next"),
                 InlineKeyboardButton(auto_track_label, callback_data="panel_auto_track"),
             ],
             [
@@ -533,7 +528,7 @@ def control_panel_markup(state: ChatState) -> InlineKeyboardMarkup:
             [
                 InlineKeyboardButton("🔉 Vol -", callback_data="panel_vol_down"),
                 InlineKeyboardButton("🔊 Vol +", callback_data="panel_vol_up"),
-                InlineKeyboardButton("🔄 Actualizar", callback_data="panel_refresh"),
+                InlineKeyboardButton("🔄 Refresh", callback_data="panel_refresh"),
             ],
             [
                 voice_button,
