@@ -495,6 +495,9 @@ def control_header(state: ChatState) -> str:
         f"🔊 Vol: <b>{state.volume}</b>\n\n"
     )
 
+def control_panel_text(state: ChatState) -> str:
+    return control_header(state) + "Selecciona una acción del panel."
+    
 def control_panel_markup(state: ChatState) -> InlineKeyboardMarkup:
     voice_button = InlineKeyboardButton("🎧 Ir directo", callback_data="panel_join_live")
     live_label = "🔴LIVE OFF" if state.live_enabled else " LIVE ON"
