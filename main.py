@@ -459,7 +459,7 @@ def panel_text(state: ChatState) -> str:
         song_label = "❌"
         song_value = "Nada sonando"
 
-    return f"🔊 <p><strong>DIRECTO</strong></p> {status} <b>{song_label}</b> <i>{song_value}</i> | 🎧 DJ: <b>{dj}</b>"
+    return f"🔊 <b>DIRECTO</b> {status} <b>{song_label}</b> <i>{h(song_value)}</i> | 🎧 DJ: <b>{h(dj)}</b>"
 
 
 def panel_markup() -> Optional[InlineKeyboardMarkup]:
