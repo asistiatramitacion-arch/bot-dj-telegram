@@ -449,17 +449,17 @@ def panel_text(state: ChatState) -> str:
 
     if state.now_playing:
         track = Track(**state.now_playing)
-        song_label = "AHORA"
+        song_label = "▶️"
         song_value = shorten_title(track.title, 28)
     elif state.queue:
         track = Track(**state.queue[0])
-        song_label = "SIG"
+        song_label = "⏭️"
         song_value = shorten_title(track.title, 28)
     else:
-        song_label = "SIG"
+        song_label = "⏺️"
         song_value = "Nada sonando"
 
-    return f"{status} <b>DJ-PLAN:</b> <b>{dj}</b> ✨ | 🎶<b>{song_label}:</b> <i>{song_value}</i>🎶"
+    return f"{status} <b>DJ-PLAN:</b>✨ | 🎶<b>{song_label}:</b> <i>{song_value}</i>🎶"
 
 
 def panel_markup() -> Optional[InlineKeyboardMarkup]:
