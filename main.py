@@ -444,22 +444,22 @@ def panel_text(state: ChatState) -> str:
     if state.panel_override_text:
         return f"✨ <b>DJ-PLAN✨ {state.panel_override_text}</b>"
 
-    status = "🟢🔊" if state.live_enabled else "🔴🔇"
+    status = "🛜ON🛜" if state.live_enabled else "🛑OFF🛑"
     dj = state.assigned_dj_name or "Sin asignar"
 
     if state.now_playing:
         track = Track(**state.now_playing)
-        song_label = "AHORA"
+        song_label = "💽"
         song_value = shorten_title(track.title, 28)
     elif state.queue:
         track = Track(**state.queue[0])
-        song_label = "SIG"
+        song_label = "⏭️"
         song_value = shorten_title(track.title, 28)
     else:
-        song_label = "SIG"
+        song_label = "❌"
         song_value = "Nada sonando"
 
-    return f"{status} <b>DJ-PLAN:</b> <b>{dj}</b> ✨ | 🎶<b>{song_label}:</b> <i>{song_value}</i>🎶"
+    return f"🎧<b>DIRECTO</b>🎧{status}💽<b>{song_label}</b> <i>{song_value}</i>🎶"<b>{dj}</b>
 
 
 def panel_markup() -> Optional[InlineKeyboardMarkup]:
@@ -490,8 +490,8 @@ def control_header(state: ChatState) -> str:
         f"📚 Biblioteca: <b>{len(state.library)}</b>\n"
         f"🎧 DJ actual: <b>{state.assigned_dj_name or 'Sin asignar'}</b>\n"
         f"🔴 LIVE: <b>{live_label}</b>\n"
-        f"🔁 AUTO-TRACK: <b>{auto_track_label}</b>\n"
-        f"⏭️ AUTO-SIG: <b>{auto_sig_label}</b>\n"
+        f"🔁 AUTO: <b>{auto_track_label}</b>\n"
+        f"⏭️ tEMP: <b>{auto_sig_label}</b>\n"
         f"🔊 Volumen: <b>{state.volume}</b>\n\n"
     )
 
@@ -528,7 +528,7 @@ def control_panel_markup(state: ChatState) -> InlineKeyboardMarkup:
             [
                 InlineKeyboardButton("📌 Fijar temporal", callback_data="panel_pin_edit"),
                 InlineKeyboardButton("👥 Permisos", callback_data="panel_users"),
-                InlineKeyboardButton("🧹 LIMPIAR", callback_data="panel_clean"),
+                InlineKeyboardButton("🧹 Limpiar", callback_data="panel_clean"),
             ],
             [
                 InlineKeyboardButton("🔉 Vol -", callback_data="panel_vol_down"),
