@@ -4,3 +4,5 @@ py-tgcalls==2.2.11
 ntgcalls==2.1.0
 Pillow
 openai
+yt-dlp
+mutagen
